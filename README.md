@@ -1,13 +1,17 @@
-# Wireshark & Network Analysis
+# Lab 2 — Wireshark & Network Analysis
+
+Full walkthrough: [Loom video](https://loom.com/share/2e0c11b46c1342c3b6858fd33ec923da)
 
 Hands-on network traffic analysis using Wireshark, run against a self-created VM to simulate real traffic and capture it firsthand.
+
+## At a Glance
 
 | | |
 |---|---|
 | **Tool** | Wireshark (free, open source) |
 | **Environment** | Local machine or Azure VM |
 | **Certification alignment** | CompTIA Network+ · Security+ · CySA+ |
-| **Time to complete** | 2–4 hours |
+| **Time to complete** | 2 to 4 hours |
 | **Cost** | $0 |
 | **Career relevance** | Network Engineer · SOC Analyst · Cloud Security Engineer · Incident Responder |
 
@@ -16,6 +20,12 @@ Hands-on network traffic analysis using Wireshark, run against a self-created VM
 Networks carry everything an organization produces: emails, login credentials, API calls, database queries. When something breaks or looks suspicious, the network is almost always involved, and the only way to know what's actually happening is to look at the packets.
 
 Wireshark captures the raw data moving across a network interface and lets you inspect it at every layer, from the physical frame up to the application payload. The mental model built here transfers directly to reading Azure Network Watcher logs, VPC flow logs, and any cloud-native traffic analysis tool.
+
+## Architecture: How Wireshark Captures Traffic
+
+![Traffic flow from the internet through a router and network interface into Wireshark, which inspects packets at every layer](docs/architecture-diagram.png)
+
+Traffic moves from the internet, through a router or switch, and into a network interface before Wireshark ever sees it. Wireshark listens on that interface and, once a packet reaches it, can break it open at every layer: the raw frame, the Ethernet and IP addressing, the TCP or UDP connection info, and finally the application data itself (DNS, HTTP, and so on). On a switched network, that generally means your own traffic plus broadcasts, unless promiscuous mode or port mirroring exposes more.
 
 ## Core Concepts
 
