@@ -1,4 +1,4 @@
-# Lab 2 — Wireshark & Network Analysis
+# Wireshark & Network Analysis
 
 Hands-on network traffic analysis using Wireshark, run against a self-created VM to simulate real traffic and capture it firsthand.
 
