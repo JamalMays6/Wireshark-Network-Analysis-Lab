@@ -1,6 +1,6 @@
 # Lab 2 — Wireshark & Network Analysis
 
-##Full walkthrough: [Loom video](https://loom.com/share/2e0c11b46c1342c3b6858fd33ec923da)
+## Full walkthrough: [Loom video](https://loom.com/share/2e0c11b46c1342c3b6858fd33ec923da)
 
 Hands-on network traffic analysis using Wireshark, run against a self-created VM to simulate real traffic and capture it firsthand.
 
