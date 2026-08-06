@@ -27,6 +27,25 @@ Wireshark captures the raw data moving across a network interface and lets you i
 
 Traffic moves from the internet, through a router or switch, and into a network interface before Wireshark ever sees it. Wireshark listens on that interface and, once a packet reaches it, can break it open at every layer: the raw frame, the Ethernet and IP addressing, the TCP or UDP connection info, and finally the application data itself (DNS, HTTP, and so on). On a switched network, that generally means your own traffic plus broadcasts, unless promiscuous mode or port mirroring exposes more.
 
+## Repo Structure
+
+```
+.
+├── captures/
+│   └── README.md                  # placeholder, add your .pcapng files here
+├── docs/
+│   ├── architecture-diagram.png
+│   ├── lab-notes.md               # full step-by-step notes and filters used
+│   └── screenshots/
+│       ├── 01-ethernet-capture-overview.jpg
+│       ├── 02-dns-lookup-nslookup.jpg
+│       ├── 03-tcp-three-way-handshake.jpg
+│       ├── 04-http-login-request.jpg
+│       ├── 05-http-traffic-list.jpg
+│       └── 06-tcp-stream-reassembly.jpg
+└── README.md
+```
+
 ## Core Concepts
 
 **Packet**: a small chunk of data that travels across the network. When you send a text or load a webpage, that data gets broken into many packets, each with its own header (source IP, destination IP, port numbers, protocol flags) and a fragment of the payload (the actual content).
@@ -44,25 +63,36 @@ Traffic moves from the internet, through a router or switch, and into a network 
 - Spotting cleartext credentials in HTTP traffic
 - Following a full TCP stream to reconstruct a conversation
 
+Full step-by-step notes and filters used: [docs/lab-notes.md](docs/lab-notes.md).
+
 ## Exercises
 
 ### A. DNS Lookup
 Started a capture, ran `nslookup google.com` from a separate terminal to trigger a DNS query on demand, then stopped the capture and filtered on `dns`. Located the query packet ("standard query A google.com") and the response packet, and confirmed the IP address in the response matched what the terminal returned.
 
+![DNS lookup and nslookup](docs/screenshots/02-dns-lookup-nslookup.jpg)
+
 **Why it matters:** Unexpected DNS queries to unusual domains are often the first sign of malware calling home. Knowing what normal DNS traffic looks like is step one to spotting abnormal traffic.
 
 ### B. TCP Three-Way Handshake
-Captured traffic while browsing to `http://example.com`, then filtered on `tcp and ip.addr == [IP]` to isolate the connection. Identified the SYN, SYN-ACK, and ACK packets in sequence.
+Captured traffic while browsing to a test login page, then filtered on `tcp and ip.addr == [IP]` to isolate the connection. Identified the SYN, SYN-ACK, and ACK packets in sequence, followed by the HTTP request once the connection was established.
 
-**Why it matters:** This is the fastest way to diagnose a "can't connect" ticket. A missing SYN-ACK or a RST tells you immediately where the failure is.
+![TCP three-way handshake](docs/screenshots/03-tcp-three-way-handshake.jpg)
+
+**Why it matters:** This is the fastest way to diagnose a "can't connect" ticket. A missing SYN-ACK or a RST tells you immediately where the failure is, whether it's client-side, network-side, or server-side.
 
 ### C. Cleartext Credentials over HTTP
 *Performed only against a local or permitted test environment.* Submitted a test login over plain HTTP, filtered on `http.request.method == POST`, and inspected the form-encoded data. The username and password were visible in plaintext.
 
+![HTTP login request](docs/screenshots/04-http-login-request.jpg)
+![HTTP traffic list](docs/screenshots/05-http-traffic-list.jpg)
+
 **Why it matters:** This is exactly how security teams demonstrate the real-world risk of skipping HTTPS to developers who push back on adding encryption.
 
 ### D. Follow a TCP Stream
-Right-clicked an HTTP packet, then chose Follow, then TCP Stream, to reassemble the full client/server conversation from individual packets.
+Right-clicked an HTTP packet, then chose Follow, then TCP Stream, to reassemble the full client/server conversation from individual packets into one readable exchange, with red text for the request and blue text for the response.
+
+![TCP stream reassembly](docs/screenshots/06-tcp-stream-reassembly.jpg)
 
 **Why it matters:** This is how incident responders reconstruct what happened during a network event, not from isolated packets, but from the full exchange.
 
@@ -74,11 +104,21 @@ Right-clicked an HTTP packet, then chose Follow, then TCP Stream, to reassemble 
 | `tcp_handshake.pcapng` | A complete SYN, SYN-ACK, ACK sequence |
 | `tcp_stream.pcapng` | A reassembled HTTP request/response conversation |
 
+## Biggest Lesson Learned
+
+Seeing a password cross the wire in plain text is a different kind of understanding than reading about why HTTPS matters. Once you've watched `HTML Form URL Encoded` data hand over a real username and password with zero effort, "always use HTTPS" stops being a policy line and becomes something you'd actually enforce.
+
 ## Key Takeaways
 
 - Packet capture is the ground-truth source for diagnosing connectivity and security issues. Logs and dashboards are summaries; packets are the raw evidence.
 - Display filters turn an unusable flood of packets into a targeted investigation.
 - The same skills used here (filtering, handshake analysis, stream reconstruction) apply directly to cloud-native traffic logs like Azure Network Watcher and AWS VPC Flow Logs.
+
+## What's Next
+
+- Capture traffic between two separate hosts instead of only the local machine (port mirroring or a second VM)
+- Practice with `tshark`, the command-line version of Wireshark, for scripted or remote captures
+- Build a noisier capture environment to practice filtering under conditions closer to production traffic
 
 ## Tools
 
